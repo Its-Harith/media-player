@@ -1,94 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Focus Sounds — Study Media Player</title>
-  <link rel="stylesheet" href="reset.css" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Focus Sounds, Study Media Player</title>
+<link rel="stylesheet" href="reset.css" />
+<link rel="stylesheet" href="style.css" />
+<script src="script.js" defer></script>
 </head>
 <body>
 
-  <header>
-    <h1>Focus Sounds</h1>
-    <p>Ambient music for deep work and study sessions</p>
-    <nav>
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Sessions</a></li>
-        <li><a href="#">About</a></li>
-      </ul>
-    </nav>
-  </header>
+<!--
+  Context: music for relaxation/study. This choice shapes the whole
+  interface, the tool needs to feel calm and stay in the background,
+  since the user is here to concentrate on something else, not on
+  the player. Unlike a DJ-mix context, nothing here should invite
+  active manipulation.
+-->
 
-  <main class="container">
+<header>
+<h1>Focus Sounds</h1>
+<p>Ambient music for deep work and study sessions</p>
+<nav>
+<ul>
+<!-- Nav links point to real sections on this single page, rather
+     than separate pages, since the whole experience is meant to
+     happen in one uninterrupted view. -->
+<li><a href="#top">Home</a></li>
+<li><a href="#session">Sessions</a></li>
+<li><a href="#about">About</a></li>
+</ul>
+</nav>
+</header>
 
-    <div class="media-player">
-      <!-- Audio element replaces the original video element, since this
-           context is music rather than footage. Same event model as video. -->
-      <audio id="audio-player">
-        <source src="study-track.mp3" type="audio/mpeg" />
-      </audio>
+<main class="container" id="top">
 
-      <div class="custom-controls">
-        <div class="transport-row">
-          <button id="play-pause-btn" aria-label="Play or pause">
-            <img id="play-pause-img" src="https://img.icons8.com/ios-glyphs/30/play--v1.png" alt="Play" />
-          </button>
-          <span class="time-label" id="current-time">0:00</span>
-          <div class="progress-bar" id="progress-bar">
-            <span id="progress-bar-fill"></span>
-          </div>
-          <span class="time-label" id="duration-time">0:00</span>
-        </div>
+<div class="media-player" id="session">
+<!-- Audio element replaces the original video element, since this
+     context is music rather than footage. Same event model as
+     video, so the underlying JS logic stays close to what was
+     covered in class, just repointed at audio. -->
+<audio id="audio-player">
+<source src="assets/relax-music.mp3" type="audio/mpeg" />
+</audio>
 
-        <div class="volume-row">
-          <span>Volume</span>
-          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" />
-        </div>
+<div class="custom-controls">
+<div class="transport-row">
+<!-- Single toggle button for play/pause instead of two buttons,
+     to reduce clutter and match how most music apps present
+     transport controls. -->
+<button id="play-pause-btn" aria-label="Play or pause">
+<img id="play-pause-img" src="https://img.icons8.com/ios-glyphs/30/play--v1.png" alt="Play" />
+</button>
+<span class="time-label" id="current-time">0:00</span>
+<!-- Clickable progress bar lets users scrub directly, keeping
+     the whole player visually consistent with the custom style
+     rather than mixing in a native slider. -->
+<div class="progress-bar" id="progress-bar">
+<span id="progress-bar-fill"></span>
+</div>
+<span class="time-label" id="duration-time">0:00</span>
+</div>
 
-        <div class="loop-toggle">
-          <input type="checkbox" id="loop-checkbox" />
-          <label for="loop-checkbox">Loop session</label>
-        </div>
-      </div>
-    </div>
+<div class="volume-row">
+<span>Volume</span>
+<input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" />
+</div>
 
-    <!-- Extra interactive feature: Pomodoro-style study timer -->
-    <div class="timer-panel">
-      <h2>Study Timer</h2>
-      <div class="timer-display" id="timer-display">25:00</div>
-      <div class="timer-buttons">
-        <button class="primary" id="timer-start-btn">Start</button>
-        <button id="timer-pause-btn">Pause</button>
-        <button id="timer-reset-btn">Reset</button>
-      </div>
-      <div class="timer-mode">
-        <button class="timer-mode-btn active" data-minutes="25">Focus 25</button>
-        <button class="timer-mode-btn" data-minutes="5">Break 5</button>
-        <button class="timer-mode-btn" data-minutes="50">Focus 50</button>
-      </div>
-    </div>
+<div class="loop-toggle">
+<input type="checkbox" id="loop-checkbox" />
+<label for="loop-checkbox">Loop session</label>
+</div>
+</div>
+</div>
 
-    <section class="about">
-      <h2>About this session</h2>
-      <p>Press play, set your timer, and settle in. The ambient track loops quietly in the background while the study timer keeps you honest, when it hits zero, it's time for a short break.</p>
-    </section>
+<!-- Extra interactive feature required by the brief: a Pomodoro-
+     style study timer. Chosen because it extends the study context
+     meaningfully rather than adding an unrelated gimmick, it gives
+     the page a second purpose that still serves the same goal. -->
+<div class="timer-panel">
+<h2>Study Timer</h2>
+<div class="timer-display" id="timer-display">25:00</div>
+<div class="timer-buttons">
+<button class="primary" id="timer-start-btn">Start</button>
+<button id="timer-pause-btn">Pause</button>
+<button id="timer-reset-btn">Reset</button>
+</div>
+<div class="timer-mode">
+<button class="timer-mode-btn active" data-minutes="25">Focus 25</button>
+<button class="timer-mode-btn" data-minutes="5">Break 5</button>
+<button class="timer-mode-btn" data-minutes="50">Focus 50</button>
+</div>
+</div>
 
-  </main>
+<section class="about" id="about">
+<h2>About this session</h2>
+<p>Hit play, pick a session length, and let the ambient sound fade into the background. When the timer runs out, that's your cue to stretch, breathe, and step away for a few minutes.</p>
+</section>
 
-  <footer>
-    <p>&copy; 2026 Focus Sounds. All rights reserved.</p>
-    <p>
+</main>
+
+<footer>
+<p>&copy; 2026 Focus Sounds. All rights reserved.</p>
+<p>
       Music: "Relax Music" by Marlowe Music [To add license/source link here]
-    </p>
-    <p>
-      <a href="https://icons8.com/icon/59862/play">Play</a> /
-      <a href="https://icons8.com/icon/61012/pause">Pause</a> icons by
-      <a href="https://icons8.com">Icons8</a>
-    </p>
-  </footer>
+</p>
+<p>
+<a href="https://icons8.com/icon/59862/play">Play</a> /
+<a href="https://icons8.com/icon/61012/pause">Pause</a> icons by
+<a href="https://icons8.com">Icons8</a>
+</p>
+</footer>
 
 </body>
 </html>

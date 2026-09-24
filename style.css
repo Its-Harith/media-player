@@ -1,3 +1,9 @@
+/*
+  Colour palette and typography are chosen to match a calm, study-
+  friendly context: muted sage-green tones instead of bright or
+  saturated colours, and a serif typeface for a slightly softer,
+  less "techy" feel than a sans-serif UI font would give.
+*/
 :root {
   --bg: #eef1ea;
   --panel: #ffffff;
@@ -6,7 +12,9 @@
   --accent: #8aa898;
   --accent-dark: #6d8b7a;
   --accent-soft: #dde8de;
-  --radius: 18px;
+  --radius: 18px; /* soft rounded corners throughout, avoiding sharp
+                      edges that would feel more "commercial" than
+                      "restful" */
 }
 
 body {
@@ -28,7 +36,8 @@ header {
 
 header h1 {
   font-size: 2rem;
-  font-weight: 400;
+  font-weight: 400; /* lighter weight keeps the heading calm rather
+                        than shouting for attention */
   letter-spacing: 0.5px;
 }
 
@@ -39,9 +48,7 @@ header p {
   font-style: italic;
 }
 
-nav {
-  margin-top: 18px;
-}
+nav { margin-top: 18px; }
 
 nav ul {
   list-style: none;
@@ -55,7 +62,10 @@ nav a {
   color: var(--muted);
   font-size: 0.9rem;
   letter-spacing: 0.5px;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease; /* slow transition matches the
+                                   unhurried feel of the rest of
+                                   the site, instead of a snappy
+                                   instant colour change */
 }
 
 nav a:hover { color: var(--accent-dark); }
@@ -69,6 +79,9 @@ main.container {
   gap: 24px;
 }
 
+/* Player and timer are both styled as soft white "cards" with a
+   subtle shadow, so they read as calm, separate resting points on
+   the page rather than one dense block of UI. */
 .media-player {
   background: var(--panel);
   border-radius: var(--radius);
@@ -105,7 +118,9 @@ main.container {
 
 .custom-controls button:hover {
   background: var(--accent);
-  transform: scale(1.05);
+  transform: scale(1.05); /* small, gentle hover feedback rather
+                              than a dramatic effect, so it confirms
+                              interactivity without being jarring */
 }
 
 .custom-controls button img { width: 18px; height: 18px; filter: brightness(0) saturate(100%); }
@@ -125,7 +140,9 @@ main.container {
   width: 0;
   background: var(--accent-dark);
   border-radius: 10px;
-  transition: width 0.15s linear;
+  transition: width 0.15s linear; /* smooth fill rather than jumpy
+                                      updates, since jumpy motion
+                                      would undercut the calm mood */
 }
 
 .time-label {
@@ -174,6 +191,10 @@ main.container {
   letter-spacing: 0.5px;
 }
 
+/* Large, tabular-numeral timer display so the countdown is easy to
+   read at a glance without needing to focus closely on it, the
+   user should be able to check remaining time peripherally while
+   working. */
 .timer-display {
   font-size: 3.2rem;
   color: var(--accent-dark);
@@ -225,6 +246,9 @@ main.container {
   cursor: pointer;
 }
 
+/* Active mode button gets a filled background so the user always
+   has clear, immediate feedback on which session length is
+   currently selected. */
 .timer-mode button.active {
   background: var(--accent-soft);
   color: var(--accent-dark);
@@ -245,9 +269,7 @@ section.about h2 {
   margin-bottom: 8px;
 }
 
-section.about p {
-  font-size: 0.9rem;
-}
+section.about p { font-size: 0.9rem; }
 
 footer {
   width: 100%;
