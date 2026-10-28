@@ -1,136 +1,130 @@
-/*
-  This file connects the custom HTML controls (play/pause button,
-  progress bar, volume slider, loop checkbox) to the real <audio>
-  element. The browser's default audio controls are hidden and
-  rebuilt from scratch here so the player matches the site's calm,
-  minimal visual style instead of looking like a generic browser
-  widget dropped onto the page.
-*/
-
-const audio = document.getElementById("audio-player");
-const playPauseBtn = document.getElementById("play-pause-btn");
-const playPauseImg = document.getElementById("play-pause-img");
-const progressBar = document.getElementById("progress-bar");
-const progressBarFill = document.getElementById("progress-bar-fill");
-const currentTimeLabel = document.getElementById("current-time");
-const durationLabel = document.getElementById("duration-time");
-const volumeSlider = document.getElementById("volume-slider");
-const loopCheckbox = document.getElementById("loop-checkbox");
-
-// Play/Pause toggles playback and swaps the icon so the button
-// always reflects current state. This matters in a music context
-// where users glance at the player rather than watch it closely —
-// the icon needs to communicate state at a glance.
-playPauseBtn.addEventListener("click", () => {
-  if (audio.paused) {
-    audio.play();
-    playPauseImg.src = "https://img.icons8.com/ios-glyphs/30/pause--v1.png";
-    playPauseImg.alt = "Pause";
-  } else {
-    audio.pause();
-    playPauseImg.src = "https://img.icons8.com/ios-glyphs/30/play--v1.png";
-    playPauseImg.alt = "Play";
+// ---------- ERROR SAFETY NET ----------
+// If anything throws, show it on screen instead of failing silently —
+// this is what "nothing happens when I click" usually hides.
+window.onerror = function (message) {
+  const statusEl = document.getElementById("status");
+  if (statusEl) {
+    statusEl.textContent = "Error: " + message;
+    statusEl.style.color = "#ff8080";
   }
-});
+};
 
-// Progress bar and time labels update continuously during playback,
-// giving passive feedback without requiring the user to interact.
-audio.addEventListener("timeupdate", () => {
-  const percent = (audio.currentTime / audio.duration) * 100;
-  progressBarFill.style.width = `${percent}%`;
-  currentTimeLabel.textContent = formatTime(audio.currentTime);
-});
-
-audio.addEventListener("loadedmetadata", () => {
-  durationLabel.textContent = formatTime(audio.duration);
-});
-
-// Clicking anywhere on the progress bar seeks to that point,
-// rather than only allowing playback to move forward passively.
-progressBar.addEventListener("click", (e) => {
-  const barWidth = progressBar.clientWidth;
-  const clickX = e.offsetX;
-  audio.currentTime = (clickX / barWidth) * audio.duration;
-});
-
-volumeSlider.addEventListener("input", () => {
-  audio.volume = volumeSlider.value;
-});
-
-loopCheckbox.addEventListener("change", () => {
-  audio.loop = loopCheckbox.checked;
-});
-
-function formatTime(seconds) {
-  if (isNaN(seconds)) return "0:00";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+// ---------- SOUND SETUP ----------
+if (typeof Tone === "undefined") {
+  document.getElementById("status").textContent =
+    "Tone.js didn't load — check your internet connection and refresh.";
+  throw new Error("Tone.js failed to load from unpkg");
 }
 
-/*
-  Study Timer, the extra interactive feature required beyond the
-  base player. Deliberately kept independent of the audio track's
-  length: a study session's duration is a personal choice, not
-  something that should be dictated by how long an ambient loop
-  happens to run. This also means the same short audio file can
-  loop safely under a 50-minute session without needing multiple
-  audio files of different lengths.
-*/
+const synth = new Tone.PolySynth().toDestination();
+const scale = ["C4", "D4", "E4", "G4", "A4"];
 
-const timerDisplay = document.getElementById("timer-display");
-const startBtn = document.getElementById("timer-start-btn");
-const pauseBtn = document.getElementById("timer-pause-btn");
-const resetBtn = document.getElementById("timer-reset-btn");
-const modeButtons = document.querySelectorAll(".timer-mode-btn");
+// ---------- WHAT THIS PROTOTYPE TESTS ----------
+// This is the linear baseline for the Information Design area: flowers
+// spawn at an EVEN interval, so garden fullness = % of time elapsed,
+// no acceleration or staging. The bar below the garden makes that
+// linear relationship explicit and literal. The garden itself stays
+// blurred throughout the study phase — visible as soft blooming shapes,
+// but not yet "in focus" as a playable instrument — until the bar hits
+// 100%, at which point it bursts and the garden is revealed in focus,
+// marking a clear, single transition from waiting to playing.
+const STUDY_DURATION_MS = 8000; // sped up for testing; use 25 * 60 * 1000 for a real session
+const FLOWER_COUNT = 10;
+const colors = ["#e08ab3", "#f2c14e", "#7dd87d", "#8ab6e0", "#c98ae0"];
 
-let totalSeconds = 25 * 60;
-let timerInterval = null;
+const status = document.getElementById("status");
+const gardenWrap = document.getElementById("garden-wrap");
+const garden = document.getElementById("garden");
+const barFill = document.getElementById("bar-fill");
 
-function updateTimerDisplay() {
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
-  timerDisplay.textContent = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-}
+function spawnFlower() {
+  const flower = document.createElement("div");
+  flower.className = "field-flower";
 
-// Guards against multiple intervals stacking if Start is clicked
-// repeatedly, which would otherwise make the countdown run too fast.
-startBtn.addEventListener("click", () => {
-  if (timerInterval) return;
-  timerInterval = setInterval(() => {
-    if (totalSeconds > 0) {
-      totalSeconds--;
-      updateTimerDisplay();
-    } else {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-  }, 1000);
-});
+  const x = Math.random() * (window.innerWidth - 40) + 20;
+  const y = Math.random() * (window.innerHeight - 120) + 20; // keep clear of the bar
+  flower.style.left = x + "px";
+  flower.style.top = y + "px";
 
-pauseBtn.addEventListener("click", () => {
-  clearInterval(timerInterval);
-  timerInterval = null;
-});
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  flower.style.background = color;
+  flower.style.color = color;
+  flower.dataset.note = scale[Math.floor(Math.random() * scale.length)];
 
-resetBtn.addEventListener("click", () => {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  const activeMode = document.querySelector(".timer-mode-btn.active");
-  totalSeconds = Number(activeMode.dataset.minutes) * 60;
-  updateTimerDisplay();
-});
-
-// Mode buttons let the user pick a preset length. Switching modes
-// mid-countdown resets the timer to avoid a confusing mismatch
-// between the selected mode and the time shown.
-modeButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    modeButtons.forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    clearInterval(timerInterval);
-    timerInterval = null;
-    totalSeconds = Number(btn.dataset.minutes) * 60;
-    updateTimerDisplay();
+  garden.appendChild(flower);
+  requestAnimationFrame(function () {
+    flower.classList.add("grown");
   });
-});
+}
+
+function studyPhase() {
+  // Even spawn interval — the defining trait of this prototype
+  const interval = STUDY_DURATION_MS / FLOWER_COUNT;
+  let spawned = 0;
+  const spawnTimer = setInterval(function () {
+    spawnFlower();
+    spawned++;
+    if (spawned >= FLOWER_COUNT) {
+      clearInterval(spawnTimer);
+    }
+  }, interval);
+
+  // Bar fills at a constant rate, matching the flowers' pace exactly
+  const startTime = performance.now();
+  function updateBar() {
+    const elapsed = performance.now() - startTime;
+    const percent = Math.min(100, (elapsed / STUDY_DURATION_MS) * 100);
+    barFill.style.width = percent + "%";
+
+    if (elapsed < STUDY_DURATION_MS) {
+      requestAnimationFrame(updateBar);
+    } else {
+      explodeBar();
+    }
+  }
+  requestAnimationFrame(updateBar);
+}
+
+// ---------- THE REVEAL MOMENT ----------
+function explodeBar() {
+  status.textContent = "";
+  barFill.classList.add("exploding");
+
+  // Remove the blur in the same moment the bar bursts, so the two
+  // effects read as one single event rather than two separate ones
+  gardenWrap.classList.add("revealed");
+
+  // Wait for the burst animation to finish before starting play mode
+  setTimeout(startBreak, 650);
+}
+
+// ---------- BREAK PHASE: hover to play ----------
+function startBreak() {
+  document.getElementById("bar-track").style.display = "none";
+  document.body.classList.add("break-mode");
+  status.textContent = "Break — move your mouse over the flowers";
+
+  const flowers = document.querySelectorAll(".field-flower");
+
+  flowers.forEach(function (flower) {
+    flower.addEventListener("mouseenter", function () {
+      synth.triggerAttack(flower.dataset.note);
+      flower.classList.add("playing");
+    });
+
+    flower.addEventListener("mouseleave", function () {
+      synth.triggerRelease(flower.dataset.note);
+      flower.classList.remove("playing");
+    });
+  });
+}
+
+document.body.addEventListener(
+  "click",
+  function startOnce() {
+    status.textContent = "Study phase: flowers growing...";
+    studyPhase();
+    document.body.removeEventListener("click", startOnce);
+  },
+  { once: true }
+);
